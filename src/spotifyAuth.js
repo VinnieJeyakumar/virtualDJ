@@ -1,5 +1,5 @@
-const clientId = "something";
-const clientSecret = "something";
+const clientId = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
+const clientSecret = process.env.REACT_APP_SPOTIFY_CLIENT_SECRET;
 
 const basicAuth = btoa(`${clientId}:${clientSecret}`);
 
