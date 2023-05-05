@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #181818;
+  font-family: 'Roboto', sans-serif;
+}
+
+.login-content {
+  text-align: center;
+}
+
+.login-title {
+  font-size: 60px;
+  font-weight: 700;
+  color: #1db954;
+  margin-bottom: 15px;
+}
+
+.login-subtitle {
+  font-size: 32px;
+  color: #ffffff;
+  margin-bottom: 40px;
+}
+
+.login-button {
+  display: inline-block;
+  font-size: 28px;
+  text-decoration: none;
+  color: #ffffff;
+  background-color: #1db954;
+  padding: 20px 50px;
+  border-radius: 30px;
+  transition: background-color 0.3s;
+}
+
+.login-button:hover {
+  background-color: #1ed760;
+}
+
+.login-disclaimer {
+  font-size: 16px;
+  color: #ffffff;
+  margin-top: 20px;
+}
