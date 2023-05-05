@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { v4 as uuidv4 } from "uuid";
 import "./App.css";
 
 function WebPlayback(props) {
@@ -7,7 +6,7 @@ function WebPlayback(props) {
   const [queue, setQueue] = useState([]);
   const [songs, setSongs] = useState([]);
   const [albumCover, setAlbumCover] = useState(null);
-  const [player, setPlayer] = useState(undefined);
+  const [setPlayer] = useState(undefined);
   const accessToken = props.token;
 
   useEffect(() => {
@@ -38,7 +37,7 @@ function WebPlayback(props) {
 
       player.connect();
     };
-  }, [accessToken]);
+  }, [accessToken, setPlayer]);
 
   const searchSongs = async () => {
     if (!search || !accessToken) return;

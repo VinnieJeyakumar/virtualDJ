@@ -7,8 +7,8 @@ const port = 5000
 
 dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
-var spotify_client_id = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
-var spotify_client_secret = process.env.REACT_APP_SPOTIFY_CLIENT_SECRET;
+const spotify_client_id = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
+const spotify_client_secret = process.env.REACT_APP_SPOTIFY_CLIENT_SECRET;
 
 var app = express();
 
