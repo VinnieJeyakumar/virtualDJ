@@ -1,42 +1,26 @@
-import React, { useState } from "react";
-import { v4 as uuidv4 } from "uuid";
-import "./App.css";
+import React, { useState, useEffect } from 'react';
+import WebPlayback from './WebPlayback'
+import Login from './Login'
+import './App.css';
 
-const App = () => {
-  const [search, setSearch] = useState("");
-  const [queue, setQueue] = useState([]);
+function App() {
+  const [token, setToken] = useState('');
 
-  const addToQueue = () => {
-    setQueue([...queue, { id: uuidv4(), song: search }]);
-    setSearch("");
-  };
+  useEffect(() => {
+    async function getToken() {
+      const response = await fetch('/auth/token');
+      const json = await response.json();
+      setToken(json.access_token);
+    }
+
+    getToken();
+  }, []);
 
   return (
-    <div className="app">
-      <header className="app-header">Virtual DJ</header>
-      <div className="app-content">
-        <div className="left-side"></div>
-        <div className="right-side">
-          <div className="search">
-            <input
-              type="text"
-              placeholder="Search for songs"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <button onClick={addToQueue}>Add</button>
-          </div>
-          <div className="queue">
-            {queue.map((item) => (
-              <div key={item.id} className="queue-item">
-                {item.song}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
+    <>
+        { (token === '') ? <Login/> : <WebPlayback token={token} /> }
+    </>
   );
-};
+}
 
 export default App;

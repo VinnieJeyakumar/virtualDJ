@@ -1,0 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap');
+
+
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #181818;
+  font-family: 'Roboto', sans-serif;
+}
+
+.login-content {
+  text-align: center;
+}
+
+.login-title {
+  font-size: 60px;
+  font-weight: 700;
+  color: #1db954;
+  margin-bottom: 15px;
+}
+
+.login-subtitle {
+  font-size: 32px;
+  color: #ffffff;
+  margin-bottom: 40px;
+}
+
+.login-button {
+  display: inline-block;
+  font-size: 28px;
+  text-decoration: none;
+  color: #ffffff;
+  background-color: #1db954;
+  padding: 20px 50px;
+  border-radius: 30px;
+  transition: background-color 0.3s;
+}
+
+.login-button:hover {
+  background-color: #1ed760;
+}
+
+.login-disclaimer {
+  font-size: 16px;
+  color: #ffffff;
+  margin-top: 20px;
+}
+
+/* Typing Animation CSS */
+
+.welcome {
+  font-size: 4.0rem;
+  font-family: 'Merriweather', sans-serif;
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+.typing-animation {
+  font-size: 3.0rem;
+  font-family: 'Courier New', Courier, monospace;
+  white-space: nowrap;
+  color: white;
+}
+
+.animation-container {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+}
+
+.typing-cursor {
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+      opacity: 1;
+  }
+  50% {
+      opacity: 0;
+  }
+}
