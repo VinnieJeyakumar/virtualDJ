@@ -66,7 +66,9 @@ function WebPlayback(props) {
 
   return (
     <div className="app">
-      <header className="app-header">Virtual DJ</header>
+      <header className="app-header">
+        <span className="app-header-text">Virtual DJ</span>
+      </header>
       <div className="app-content">
         <div className="left-side"></div>
         <div className="right-side">
