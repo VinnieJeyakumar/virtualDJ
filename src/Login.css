@@ -1,7 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap');
 
-
 .login-container {
   display: flex;
   align-items: center;
@@ -16,9 +15,11 @@
 }
 
 .login-title {
-  font-size: 60px;
+  font-size: 6.0rem;
   font-weight: 700;
-  color: #1db954;
+  background-image: linear-gradient(90deg, #4256b1, #c53055, #1895d1);
+  -webkit-background-clip: text;
+  color: transparent;
   margin-bottom: 15px;
 }
 
@@ -78,9 +79,9 @@
 @keyframes blink {
   0%,
   100% {
-      opacity: 1;
+    opacity: 1;
   }
   50% {
-      opacity: 0;
+    opacity: 0;
   }
 }
