@@ -1,4 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap');
+
 
 .login-container {
   display: flex;
@@ -45,4 +47,40 @@
   font-size: 16px;
   color: #ffffff;
   margin-top: 20px;
+}
+
+/* Typing Animation CSS */
+
+.welcome {
+  font-size: 4.0rem;
+  font-family: 'Merriweather', sans-serif;
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+.typing-animation {
+  font-size: 3.0rem;
+  font-family: 'Courier New', Courier, monospace;
+  white-space: nowrap;
+  color: white;
+}
+
+.animation-container {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+}
+
+.typing-cursor {
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+      opacity: 1;
+  }
+  50% {
+      opacity: 0;
+  }
 }
