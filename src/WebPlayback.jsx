@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect} from "react";
 import "./App.css";
 
 function WebPlayback(props) {
@@ -8,6 +8,7 @@ function WebPlayback(props) {
   const [albumCover, setAlbumCover] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [player, setPlayer] = useState(undefined);
+  const [playerReady, setPlayerReady] = useState(false);
   const [currentSongName, setCurrentSongName] = useState("");
   const [songDuration, setSongDuration] = useState(0);
   const [songProgress, setSongProgress] = useState(0);
@@ -44,6 +45,7 @@ function WebPlayback(props) {
   
         playerInstance.addListener("ready", async ({ device_id }) => {
           console.log("Ready with Device ID", device_id);
+          setPlayerReady(true);
           setActiveDevice(device_id);
           playerInstance._options.id = device_id;
         });
@@ -64,7 +66,7 @@ function WebPlayback(props) {
   }, [accessToken]);
   
   useEffect(() => {
-    if (!player || !isPlaying) return;
+    if (!player || !playerReady) return;
   
     const updateProgress = async () => {
       if (!player) return;
@@ -81,7 +83,7 @@ function WebPlayback(props) {
   
     const intervalId = setInterval(updateProgress, 10);
     return () => clearInterval(intervalId);
-  }, [player, isPlaying]);
+  }, [player, isPlaying, playerReady]);
    
   const setActiveDevice = async (device_id) => {
     if (!player || !player._options.id) return;
@@ -144,6 +146,7 @@ function WebPlayback(props) {
         },
         body: JSON.stringify({
           uris: [song.uri],
+          position_ms: 0,
         }),
       });
       setIsPlaying(true);
@@ -153,7 +156,17 @@ function WebPlayback(props) {
   };    
 
   const playNextSong = () => {
-    playSongFromQueue();
+    if (queue.length === 0) {
+      setCurrentSongName("");
+      setAlbumCover(null);
+      setIsPlaying(false);
+      setSongProgress(0);
+      if (player) {
+        player.pause();
+      }
+    } else {
+      playSongFromQueue();
+    }
   };  
 
   const togglePlayPause = async () => {
@@ -242,23 +255,32 @@ function WebPlayback(props) {
 
 const loadSpotifySDK = (token) => {
   return new Promise((resolve) => {
-    const script = document.createElement("script");
-    script.src = "https://sdk.scdn.co/spotify-player.js";
-    script.async = true;
-    document.body.appendChild(script);
+    if (window.Spotify && window.Spotify.Player) {
+      createPlayer(token, resolve);
+    } else {
+      window.onSpotifyWebPlaybackSDKReady = () => {
+        createPlayer(token, resolve);
+      };
 
-    window.onSpotifyWebPlaybackSDKReady = () => {
-      const player = new window.Spotify.Player({
-        name: "Web Playback SDK",
-        getOAuthToken: (cb) => {
-          cb(token);
-        },
-        volume: 0.5,
-      });
-
-      resolve(player);
-    };
+      const script = document.createElement("script");
+      script.src = "https://sdk.scdn.co/spotify-player.js";
+      script.async = true;
+      document.body.appendChild(script);
+    }
   });
 };
+
+const createPlayer = (token, resolve) => {
+  const player = new window.Spotify.Player({
+    name: "Web Playback SDK",
+    getOAuthToken: (cb) => {
+      cb(token);
+    },
+    volume: 0.5,
+  });
+
+  resolve(player);
+};
+
 
 export default WebPlayback;
