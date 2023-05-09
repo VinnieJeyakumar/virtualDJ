@@ -6,38 +6,98 @@ function WebPlayback(props) {
   const [queue, setQueue] = useState([]);
   const [songs, setSongs] = useState([]);
   const [albumCover, setAlbumCover] = useState(null);
-  const [setPlayer] = useState(undefined);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [player, setPlayer] = useState(undefined);
+  const [currentSongName, setCurrentSongName] = useState("");
+  const [songDuration, setSongDuration] = useState(0);
+  const [songProgress, setSongProgress] = useState(0);
   const accessToken = props.token;
 
   useEffect(() => {
     if (!accessToken) return;
-    const script = document.createElement("script");
-    script.src = "https://sdk.scdn.co/spotify-player.js";
-    script.async = true;
+    let isCancelled = false;
+  
+    const initializePlayer = async () => {
+      const playerInstance = await loadSpotifySDK(accessToken);
+      if (!isCancelled) {
+        setPlayer(playerInstance);
+  
+        playerInstance.addListener("player_state_changed", (state) => {
+          console.log("Playback state changed:", state);
+  
+          if (
+            state.paused &&
+            state.restrictions.disallow_resuming_reasons
+          ) {
+            playNextSong();
+          } else {
+            setIsPlaying(!state.paused);
+          }
 
-    document.body.appendChild(script);
-
-    window.onSpotifyWebPlaybackSDKReady = () => {
-      const player = new window.Spotify.Player({
-        name: "Web Playback SDK",
-        getOAuthToken: (cb) => {
-          cb(accessToken);
-        },
-        volume: 0.5,
-      });
-      setPlayer(player);
-
-      player.addListener("ready", ({ device_id }) => {
-        console.log("Ready with Device ID", device_id);
-      });
-
-      player.addListener("not_ready", ({ device_id }) => {
-        console.log("Device ID has gone offline", device_id);
-      });
-
-      player.connect();
+          if (state.track_window && state.track_window.current_track) {
+            const currentTrack = state.track_window.current_track;
+            setCurrentSongName(`${currentTrack.name} - ${currentTrack.artists[0].name}`);
+            setAlbumCover(currentTrack.album.images[0].url);
+            setSongDuration(currentTrack.duration_ms);
+          }
+        });
+  
+        playerInstance.addListener("ready", async ({ device_id }) => {
+          console.log("Ready with Device ID", device_id);
+          setActiveDevice(device_id);
+          playerInstance._options.id = device_id;
+        });
+  
+        playerInstance.addListener("not_ready", ({ device_id }) => {
+          console.log("Device ID has gone offline", device_id);
+        });
+  
+        playerInstance.connect();
+      }
     };
-  }, [accessToken, setPlayer]);
+  
+    initializePlayer();
+  
+    return () => {
+      isCancelled = true;
+    };
+  }, [accessToken]);
+  
+  useEffect(() => {
+    if (!player || !isPlaying) return;
+  
+    const updateProgress = async () => {
+      if (!player) return;
+      
+      try {
+        const state = await player.getCurrentState();
+        if (state) {
+          setSongProgress(state.position);
+        }
+      } catch (error) {
+        console.error('Error updating progress:', error);
+      }
+    };
+  
+    const intervalId = setInterval(updateProgress, 10);
+    return () => clearInterval(intervalId);
+  }, [player, isPlaying]);
+   
+  const setActiveDevice = async (device_id) => {
+    if (!player || !player._options.id) return;
+    await fetch("https://api.spotify.com/v1/me/player", {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        device_ids: [device_id],
+        play: false,
+      }),
+    });
+    await player.togglePlay();
+  };
 
   const searchSongs = async () => {
     if (!search || !accessToken) return;
@@ -54,16 +114,67 @@ function WebPlayback(props) {
   };
 
   const addToQueue = (song) => {
+    if (queue.length === 0 && !isPlaying) {
+      setAlbumCover(song.album.images[0].url);
+      playSong(song);
+    }
     setQueue([...queue, song]);
   };
 
-  const playNextSong = () => {
+  const playSongFromQueue = async () => {
     if (queue.length === 0) return;
-    const [nextSong, ...rest] = queue;
+
+    const [song, ...rest] = queue;
     setQueue(rest);
-    setAlbumCover(nextSong.album.images[0].url);
+    await playSong(song);
   };
 
+  const playSong = async (song) => {
+    if (!player) return;
+    setAlbumCover(song.album.images[0].url);
+    setCurrentSongName(`${song.name} - ${song.artists[0].name}`);
+    setSongDuration(song.duration_ms);
+    try {
+      await setActiveDevice(player._options.id);
+      await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${player._options.id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          uris: [song.uri],
+        }),
+      });
+      setIsPlaying(true);
+    } catch (error) {
+      console.error('Error playing song:', error);
+    }
+  };    
+
+  const playNextSong = () => {
+    playSongFromQueue();
+  };  
+
+  const togglePlayPause = async () => {
+    if (!player) return;
+    try {
+      if (!isPlaying) {
+        if (queue.length > 0 && songProgress === 0) {
+          playSongFromQueue();
+        } else {
+          await player.resume();
+          setIsPlaying(true);
+        }
+      } else {
+        await player.pause();
+        setIsPlaying(false);
+      }
+    } catch (error) {
+      console.error('Error toggling play/pause:', error);
+    }
+  };  
+  
   return (
     <div className="app">
       <header className="app-header">
@@ -73,9 +184,7 @@ function WebPlayback(props) {
         <div className="left-side"></div>
         <div className="right-side">
           <div className="right-side-left">
-            <div className="album-cover">
-              {albumCover && <img src={albumCover} alt="Album Cover" />}
-            </div>
+            <h2>Search</h2>
             <div className="search">
               <input
                 type="text"
@@ -86,8 +195,8 @@ function WebPlayback(props) {
               <button onClick={searchSongs}>Search</button>
             </div>
             <div className="songs">
-              {songs.map((song) => (
-                <div key={song.id} className="song">
+              {songs.map((song, index) => (
+                <div key={`${song.id}-${index}`} className="song">
                   {song.name} - {song.artists[0].name}
                   <button onClick={() => addToQueue(song)}>Add</button>
                 </div>
@@ -95,20 +204,61 @@ function WebPlayback(props) {
             </div>
           </div>
           <div className="right-side-right">
-            <h2>Queue</h2>
-            <div className="queue">
-            {queue.map((song) => (
-              <div key={song.id} className="queue-item">
-                {song.name} - {song.artists[0].name}
+            <div className="now-playing">
+              <div className="album-cover">
+                {albumCover && <img src={albumCover} alt="Album Cover" />}
               </div>
-            ))}
+              <h3>Now playing: {currentSongName}</h3>
+              <div className="progress-bar-container">
+                <span className="current-time">
+                  {Math.floor(songProgress / 60000)}:{((songProgress % 60000) / 1000).toFixed(0).padStart(2, "0")}
+                </span>
+                <progress className="progress-bar" value={songProgress} max={songDuration}></progress>
+                <span className="total-time">
+                  {Math.floor(songDuration / 60000)}:{((songDuration % 60000) / 1000).toFixed(0).padStart(2, "0")}
+                </span>
+              </div>
+              <div className="queue-container">
+                <h2>Queue</h2>
+                <div className="queue">
+                  {queue.map((song, index) => (
+                    <div key={`${song.id}-${index}`} className="queue-item">
+                      {song.name} - {song.artists[0].name}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="button-container">
+              <button onClick={togglePlayPause}>{isPlaying ? '❚❚' : '▶'}</button>
+              <button onClick={playNextSong}>Play Next</button>
+            </div>
           </div>
-          <button onClick={playNextSong}>Play Next</button>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
 }
+
+const loadSpotifySDK = (token) => {
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = "https://sdk.scdn.co/spotify-player.js";
+    script.async = true;
+    document.body.appendChild(script);
+
+    window.onSpotifyWebPlaybackSDKReady = () => {
+      const player = new window.Spotify.Player({
+        name: "Web Playback SDK",
+        getOAuthToken: (cb) => {
+          cb(token);
+        },
+        volume: 0.5,
+      });
+
+      resolve(player);
+    };
+  });
+};
 
 export default WebPlayback;
