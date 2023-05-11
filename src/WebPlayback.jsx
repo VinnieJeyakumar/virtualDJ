@@ -211,7 +211,7 @@ function WebPlayback(props) {
               {songs.map((song, index) => (
                 <div key={`${song.id}-${index}`} className="song">
                   {song.name} - {song.artists[0].name}
-                  <button onClick={() => addToQueue(song)}>Add</button>
+                  <button onClick={() => addToQueue(song)}>+</button>
                 </div>
               ))}
             </div>
