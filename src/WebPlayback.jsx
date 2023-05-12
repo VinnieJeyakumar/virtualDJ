@@ -1,5 +1,6 @@
 import React, { useState, useEffect} from "react";
 import "./App.css";
+import { loadSpotifySDK, searchSongs, setActiveDevice } from "./spotifyUtils";
 
 function WebPlayback(props) {
   const [search, setSearch] = useState("");
@@ -19,42 +20,46 @@ function WebPlayback(props) {
     let isCancelled = false;
   
     const initializePlayer = async () => {
-      const playerInstance = await loadSpotifySDK(accessToken);
-      if (!isCancelled) {
-        setPlayer(playerInstance);
-  
-        playerInstance.addListener("player_state_changed", (state) => {
-          console.log("Playback state changed:", state);
-  
-          if (
-            state.paused &&
-            state.restrictions.disallow_resuming_reasons
-          ) {
-            playNextSong();
-          } else {
-            setIsPlaying(!state.paused);
-          }
+      try {
+        const playerInstance = await loadSpotifySDK(accessToken);
+        if (!isCancelled) {
+          setPlayer(playerInstance);
+    
+          playerInstance.addListener("player_state_changed", (state) => {
+            console.log("Playback state changed:", state);
+    
+            if (
+              state.paused &&
+              state.restrictions.disallow_resuming_reasons
+            ) {
+              playNextSong();
+            } else {
+              setIsPlaying(!state.paused);
+            }
 
-          if (state.track_window && state.track_window.current_track) {
-            const currentTrack = state.track_window.current_track;
-            setCurrentSongName(`${currentTrack.name} - ${currentTrack.artists[0].name}`);
-            setAlbumCover(currentTrack.album.images[0].url);
-            setSongDuration(currentTrack.duration_ms);
-          }
-        });
-  
-        playerInstance.addListener("ready", async ({ device_id }) => {
-          console.log("Ready with Device ID", device_id);
-          setPlayerReady(true);
-          setActiveDevice(device_id);
-          playerInstance._options.id = device_id;
-        });
-  
-        playerInstance.addListener("not_ready", ({ device_id }) => {
-          console.log("Device ID has gone offline", device_id);
-        });
-  
-        playerInstance.connect();
+            if (state.track_window && state.track_window.current_track) {
+              const currentTrack = state.track_window.current_track;
+              setCurrentSongName(`${currentTrack.name} - ${currentTrack.artists[0].name}`);
+              setAlbumCover(currentTrack.album.images[0].url);
+              setSongDuration(currentTrack.duration_ms);
+            }
+          });
+    
+          playerInstance.addListener("ready", async ({ device_id }) => {
+            console.log("Ready with Device ID", device_id);
+            setPlayerReady(true);
+            setActiveDevice(device_id);
+            playerInstance._options.id = device_id;
+          });
+    
+          playerInstance.addListener("not_ready", ({ device_id }) => {
+            console.log("Device ID has gone offline", device_id);
+          });
+    
+          playerInstance.connect();
+        } 
+      } catch (error) {
+        console.error('Error initializing player:', error);
       }
     };
   
@@ -84,35 +89,20 @@ function WebPlayback(props) {
     const intervalId = setInterval(updateProgress, 10);
     return () => clearInterval(intervalId);
   }, [player, isPlaying, playerReady]);
-   
-  const setActiveDevice = async (device_id) => {
-    if (!player || !player._options.id) return;
-    await fetch("https://api.spotify.com/v1/me/player", {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        device_ids: [device_id],
-        play: false,
-      }),
-    });
-    await player.togglePlay();
-  };
-
-  const searchSongs = async () => {
+  
+  const handleSearchSongs = async () => {
     if (!search || !accessToken) return;
-    const response = await fetch(
-      `https://api.spotify.com/v1/search?q=${search}&type=track&limit=7`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+    try {
+      const data = await searchSongs(search, accessToken);
+      setSongs(data.tracks.items);
+    } catch (error) {
+      console.error('Error searching songs:', error);
+      if (error.message === 'Unauthorized access token') {
+        console.error('Unauthorized access token');
+      } else {
+        console.error('Other error');
       }
-    );
-    const data = await response.json();
-    setSongs(data.tracks.items);
+    }
   };
 
   const addToQueue = (song) => {
@@ -205,7 +195,7 @@ function WebPlayback(props) {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
-              <button onClick={searchSongs}>Search</button>
+              <button onClick={handleSearchSongs} disabled={!search.trim()}>Search</button>
             </div>
             <div className="songs">
               {songs.map((song, index) => (
@@ -252,35 +242,5 @@ function WebPlayback(props) {
     </div>
   );
 }
-
-const loadSpotifySDK = (token) => {
-  return new Promise((resolve) => {
-    if (window.Spotify && window.Spotify.Player) {
-      createPlayer(token, resolve);
-    } else {
-      window.onSpotifyWebPlaybackSDKReady = () => {
-        createPlayer(token, resolve);
-      };
-
-      const script = document.createElement("script");
-      script.src = "https://sdk.scdn.co/spotify-player.js";
-      script.async = true;
-      document.body.appendChild(script);
-    }
-  });
-};
-
-const createPlayer = (token, resolve) => {
-  const player = new window.Spotify.Player({
-    name: "Web Playback SDK",
-    getOAuthToken: (cb) => {
-      cb(token);
-    },
-    volume: 0.5,
-  });
-
-  resolve(player);
-};
-
 
 export default WebPlayback;

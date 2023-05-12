@@ -1,5 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
+/* Color vars */
+:root {
+  --theme-dark-blue:#4256b1; /*var(--theme-dark-blue) */
+  --theme-light-blue:#1895d1;
+  --theme-red:#c53055;
+}
+
 /* General */
 body {
   font-family: 'Roboto', sans-serif;
@@ -24,7 +31,7 @@ body {
 }
 
 .app-header-text {
-  background-image: linear-gradient(90deg, #4256b1, #c53055, #1895d1);
+  background-image: linear-gradient(90deg, var(--theme-dark-blue), var(--theme-red), var(--theme-light-blue));
   -webkit-background-clip: text;
   color: transparent;
   font-family: 'Roboto', sans-serif;
@@ -76,7 +83,7 @@ body {
 
 .search button {
   padding: 0.5rem 1rem;
-  background-color: #1895d1;
+  background-color: var(--theme-light-blue);
   color: white;
   border: none;
   border-radius: 8px;
@@ -103,7 +110,7 @@ body {
 
 .song button {
   padding: 0.5rem 1rem;
-  background-color: #1895d1;
+  background-color: var(--theme-light-blue);
   color: white;
   border: none;
   border-radius: 8px;
@@ -186,16 +193,16 @@ body {
 }
 
 .progress-bar::-webkit-progress-bar {
-  background-color: #1895d1;
-}
-
-.progress-bar::-webkit-progress-value {
-  background-color: #1895d1;
-  transition: width 0.1s linear;
+  background-color: var(--theme-light-blue);
 }
 
 .progress-bar::-moz-progress-bar {
-  background-color: #1895d1;
+  background-color: var(--theme-light-blue);
+}
+
+.progress-bar::-webkit-progress-value {
+  background-color: var(--theme-red);
+  transition: width 0.1s linear;
 }
 
 /* Playback Buttons */
@@ -210,7 +217,7 @@ body {
 
 .button-container button {
   padding: 0.5rem 1rem;
-  background-color: #c53055;
+  background-color: var(--theme-red);
   color: white;
   border: none;
   border-radius: 8px;
@@ -227,7 +234,7 @@ body {
 .search button:hover,
 .song button:hover,
 .button-container button:hover {
-  background-color: #4256b1;
+  background-color: var(--theme-dark-blue);
   opacity: 0.9;
 }
 
