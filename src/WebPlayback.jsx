@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "./App.css";
 import { loadSpotifySDK, searchSongs, setActiveDevice } from "./spotifyUtils";
 
@@ -91,11 +91,43 @@ function WebPlayback(props) {
     return () => clearInterval(intervalId);
   }, [player, isPlaying, playerReady]);
   
+  const playSong = useCallback(async (song) => {
+    if (!player) return;
+    setAlbumCover(song.album.images[0].url);
+    setCurrentSongName(`${song.name} - ${song.artists[0].name}`);
+    setSongDuration(song.duration_ms);
+    try {
+      await setActiveDevice(player._options.id);
+      await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${player._options.id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          uris: [song.uri],
+          position_ms: 0,
+        }),
+      });
+      setIsPlaying(true);
+    } catch (error) {
+      console.error('Error playing song:', error);
+    }
+  }, [accessToken, player]); 
+
+  const playSongFromQueue = useCallback(async () => {
+    if (queue.length === 0) return;
+
+    const [song, ...rest] = queue;
+    setQueue(rest);
+    await playSong(song);
+  }, [queue, playSong]);
+
   useEffect(() => {
     if (queue.length > 0 && !isPlaying) {
       playSongFromQueue();
     }
-  }, [queue, isPlaying]);
+  }, [queue, isPlaying, playSongFromQueue]);
   
   const handleSearchSongs = async () => {
     if (!search || !accessToken) return;
@@ -118,39 +150,7 @@ function WebPlayback(props) {
       setQueue([song]);
     }
     setQueue([...queue, song]);
-  };
-
-  const playSongFromQueue = async () => {
-    if (queue.length === 0) return;
-
-    const [song, ...rest] = queue;
-    setQueue(rest);
-    await playSong(song);
-  };
-
-  const playSong = async (song) => {
-    if (!player) return;
-    setAlbumCover(song.album.images[0].url);
-    setCurrentSongName(`${song.name} - ${song.artists[0].name}`);
-    setSongDuration(song.duration_ms);
-    try {
-      await setActiveDevice(player._options.id);
-      await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${player._options.id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          uris: [song.uri],
-          position_ms: 0,
-        }),
-      });
-      setIsPlaying(true);
-    } catch (error) {
-      console.error('Error playing song:', error);
-    }
-  };    
+  };   
 
   const playNextSong = () => {
     if (queue.length === 0) {
