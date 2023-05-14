@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import "./App.css";
 import { loadSpotifySDK, searchSongs, setActiveDevice } from "./spotifyUtils";
 
@@ -129,7 +129,7 @@ function WebPlayback(props) {
     }
   }, [queue, isPlaying, playSongFromQueue]);
   
-  const handleSearchSongs = async () => {
+  const handleSearchSongs = useCallback(async () => {
     if (!search || !accessToken) return;
     try {
       const data = await searchSongs(search, accessToken);
@@ -142,15 +142,27 @@ function WebPlayback(props) {
         console.error('Other error');
       }
     }
-  };
+  }, [search, accessToken]);
 
-  const addToQueue = (song) => {
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      if (search.trim()) {
+        handleSearchSongs();
+      }
+    }, 500);
+  
+    return () => {
+      clearTimeout(debounceTimer);
+    };
+  }, [search, handleSearchSongs]);
+  
+  const addToQueue = useCallback((song) => {
     if (queue.length === 0 && !isPlaying) {
       setAlbumCover(song.album.images[0].url);
       setQueue([song]);
     }
     setQueue([...queue, song]);
-  };   
+  }, [queue, isPlaying]);
 
   const playNextSong = () => {
     if (queue.length === 0) {
@@ -185,6 +197,24 @@ function WebPlayback(props) {
     }
   };  
   
+  const songList = useMemo(() => {
+    return songs.map((song, index) => (
+      <div key={`${song.id}-${index}`} className="song">
+        {song.name} - {song.artists[0].name}
+        <button onClick={() => addToQueue(song)}>+</button>
+      </div>
+    ));
+  }, [songs, addToQueue]);
+  
+  const queueList = useMemo(() => {
+    return queue.map((song, index) => (
+      <div key={`${song.id}-${index}`} className="queue-item">
+        {song.name} - {song.artists[0].name}
+      </div>
+    ));
+  }, [queue]);
+
+
   return (
     <div className="app">
       <header className="app-header">
@@ -201,18 +231,10 @@ function WebPlayback(props) {
                 placeholder="Search for songs on Spotify"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearchSongs()}
               />
               <button onClick={handleSearchSongs} disabled={!search.trim()}>Search</button>
             </div>
-            <div className="songs">
-              {songs.map((song, index) => (
-                <div key={`${song.id}-${index}`} className="song">
-                  {song.name} - {song.artists[0].name}
-                  <button onClick={() => addToQueue(song)}>+</button>
-                </div>
-              ))}
-            </div>
+            <div className="songs">{songList}</div>
           </div>
           <div className="right-side-right">
             <div className="now-playing">
@@ -231,13 +253,7 @@ function WebPlayback(props) {
               </div>
               <div className="queue-container">
                 <h2>Queue</h2>
-                <div className="queue">
-                  {queue.map((song, index) => (
-                    <div key={`${song.id}-${index}`} className="queue-item">
-                      {song.name} - {song.artists[0].name}
-                    </div>
-                  ))}
-                </div>
+                <div className="queue">{queueList}</div>
               </div>
             </div>
             <div className="button-container">
