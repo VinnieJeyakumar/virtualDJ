@@ -15,6 +15,7 @@ function WebPlayback(props) {
   const [songProgress, setSongProgress] = useState(0);
   const accessToken = props.token;
 
+  // useEffect hooks related to player and playerReady
   useEffect(() => {
     if (!accessToken) return;
     let isCancelled = false;
@@ -91,6 +92,7 @@ function WebPlayback(props) {
     return () => clearInterval(intervalId);
   }, [player, isPlaying, playerReady]);
   
+  // Callbacks and effects related to playing songs
   const playSong = useCallback(async (song) => {
     if (!player) return;
     setAlbumCover(song.album.images[0].url);
@@ -129,6 +131,7 @@ function WebPlayback(props) {
     }
   }, [queue, isPlaying, playSongFromQueue]);
   
+  // Callbacks and effects related to searching songs
   const handleSearchSongs = useCallback(async () => {
     if (!search || !accessToken) return;
     try {
@@ -156,6 +159,7 @@ function WebPlayback(props) {
     };
   }, [search, handleSearchSongs]);
   
+  // Other callbacks
   const addToQueue = useCallback((song) => {
     if (queue.length === 0 && !isPlaying) {
       setAlbumCover(song.album.images[0].url);
@@ -197,6 +201,7 @@ function WebPlayback(props) {
     }
   };  
   
+  // useMemo hooks for rendering song and queue lists
   const songList = useMemo(() => {
     return songs.map((song, index) => (
       <div key={`${song.id}-${index}`} className="song">
@@ -214,7 +219,7 @@ function WebPlayback(props) {
     ));
   }, [queue]);
 
-
+  // Component return statement (JSX)
   return (
     <div className="app">
       <header className="app-header">
