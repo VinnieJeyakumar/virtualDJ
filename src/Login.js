@@ -30,7 +30,7 @@ function TypingAnimation() {
           setIsDeleting(true);
         }
       }
-    }, isDeleting ? 100 : 200);
+    }, isDeleting ? 70 : 90);
 
     return () => clearTimeout(timeOut);
   }, [text, isDeleting, phraseIndex]);

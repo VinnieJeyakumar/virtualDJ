@@ -18,9 +18,10 @@ function App() {
 
   return (
     <>
-        { (token === '') ? <Login/> : <WebPlayback token={token} /> }
+      {!token && <Login />}
+      {token && <WebPlayback token={token} />}
     </>
-  );
+  );  
 }
 
 export default App;
