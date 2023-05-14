@@ -30,7 +30,8 @@ function WebPlayback(props) {
     
             if (
               state.paused &&
-              state.restrictions.disallow_resuming_reasons
+              state.restrictions.disallow_resuming_reasons &&
+              state.restrictions.disallow_resuming_reasons.length > 0
             ) {
               playNextSong();
             } else {
@@ -90,6 +91,12 @@ function WebPlayback(props) {
     return () => clearInterval(intervalId);
   }, [player, isPlaying, playerReady]);
   
+  useEffect(() => {
+    if (queue.length > 0 && !isPlaying) {
+      playSongFromQueue();
+    }
+  }, [queue, isPlaying]);
+  
   const handleSearchSongs = async () => {
     if (!search || !accessToken) return;
     try {
@@ -108,7 +115,7 @@ function WebPlayback(props) {
   const addToQueue = (song) => {
     if (queue.length === 0 && !isPlaying) {
       setAlbumCover(song.album.images[0].url);
-      playSong(song);
+      setQueue([song]);
     }
     setQueue([...queue, song]);
   };
@@ -194,6 +201,7 @@ function WebPlayback(props) {
                 placeholder="Search for songs on Spotify"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearchSongs()}
               />
               <button onClick={handleSearchSongs} disabled={!search.trim()}>Search</button>
             </div>
