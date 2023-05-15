@@ -1,0 +1,123 @@
+/* DJ Board */
+.dj-board {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    height: 100%;
+}
+
+.buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.toggle-button {
+    width: 50px;
+    height: 25px;
+    border: 2px solid #ccc;
+    border-radius: 15px;
+    background-color: #fff;
+    position: relative;
+    cursor: pointer;
+    outline: none;
+}
+
+.toggle-button.active {
+    background-color: #1895d1;
+}
+
+.toggle-button:before {
+    content: "";
+    display: block;
+    width: 25px;
+    height: 25px;
+    background-color: #ccc;
+    position: absolute;
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+
+.toggle-button.active:before {
+    background-color: #fff;
+    transform: translateX(25px);
+}
+
+.wheel {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background-color: #1895d1;
+    position: relative;
+}
+
+.drum-pad {
+    display: flex;
+    flex-wrap: wrap;
+    width: 200px;
+    justify-content: space-between;
+}
+
+.pad {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    outline: none;
+}
+
+.pad-1 {
+    background-color: #fd5e53;
+}
+  
+.pad-2 {
+    background-color: #ffbf30;
+}
+  
+.pad-3 {
+    background-color: #48c774;
+}
+  
+.pad-4 {
+    background-color: #3298dc;
+}
+  
+.pad-5 {
+    background-color: #8a4fff;
+}
+  
+.pad-6 {
+    background-color: #e56e6d;
+}
+  
+.knobs {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+  
+.knob {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background-color: #ccc;
+    position: relative;
+    cursor: pointer;
+}
+  
+.sliders {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+  
+.slider {
+    width: 15px;
+    height: 100px;
+    background-color: #ccc;
+    position: relative;
+    cursor: pointer;
+}
+  

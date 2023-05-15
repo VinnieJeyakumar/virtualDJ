@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import DJBoard from "./DJBoard";
 import "./App.css";
 import { loadSpotifySDK, searchSongs, setActiveDevice } from "./spotifyUtils";
 
@@ -226,7 +227,9 @@ function WebPlayback(props) {
         <span className="app-header-text">Virtual DJ</span>
       </header>
       <div className="app-content">
-        <div className="left-side"></div>
+        <div className="left-side">
+          <DJBoard />
+        </div>
         <div className="right-side">
           <div className="right-side-left">
             <h2>Search</h2>
