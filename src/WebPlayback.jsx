@@ -29,24 +29,20 @@ function WebPlayback(props) {
     
           playerInstance.addListener("player_state_changed", (state) => {
             console.log("Playback state changed:", state);
-    
-            if (
-              state.paused &&
-              state.restrictions.disallow_resuming_reasons &&
-              state.restrictions.disallow_resuming_reasons.length > 0
-            ) {
-              playNextSong();
-            } else {
-              setIsPlaying(!state.paused);
-            }
-
+          
+            setIsPlaying(!state.paused);
+          
             if (state.track_window && state.track_window.current_track) {
               const currentTrack = state.track_window.current_track;
               setCurrentSongName(`${currentTrack.name} - ${currentTrack.artists[0].name}`);
               setAlbumCover(currentTrack.album.images[0].url);
               setSongDuration(currentTrack.duration_ms);
             }
-          });
+          
+            if (state.position === 0 && state.paused) {
+              playNextSong();
+            }
+          });          
     
           playerInstance.addListener("ready", async ({ device_id }) => {
             console.log("Ready with Device ID", device_id);
