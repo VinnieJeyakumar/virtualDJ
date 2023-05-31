@@ -140,13 +140,24 @@
   margin-bottom: 4em;
 }
 
-.slider-label {
+.volume-label {
   position: absolute;
   color: #fff;
   width: 100%;
   text-align: center;
   white-space: nowrap;
   bottom: -2em;
+  right: 2vw;
+}
+
+.playback-label {
+  position: absolute;
+  color: #fff;
+  width: 100%;
+  text-align: center;
+  white-space: nowrap;
+  bottom: -2em;
+  right: 4vw;
 }
 
 /* Styling knob */

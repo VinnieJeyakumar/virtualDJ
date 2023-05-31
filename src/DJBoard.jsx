@@ -68,7 +68,7 @@ function DJBoard() {
               min={0}
               max={100}
             />
-            <label className="slider-label">Volume: {Math.round(sliderValue[0])}</label>
+            <label className="volume-label">Volume: {Math.round(sliderValue[0])}</label>
           </div>
           <div className="slider-wrap">
             <Slider 
@@ -78,7 +78,7 @@ function DJBoard() {
               min={0}
               max={100}
             />
-            <label className="slider-label">Playback Speed: {calculatePlaybackSpeed(sliderValue[1]).toFixed(2)}</label>
+            <label className="playback-label">Playback Speed: {calculatePlaybackSpeed(sliderValue[1]).toFixed(2)}</label>
           </div>
         </div>
         <div className="knobs">

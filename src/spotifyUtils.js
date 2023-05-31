@@ -56,7 +56,6 @@ const setActiveDevice = async (device_id, accessToken) => {
         }),
     });
 };
-  
-export { loadSpotifySDK, createPlayer, searchSongs, setActiveDevice };
-  
+
+export { loadSpotifySDK, createPlayer, searchSongs, setActiveDevice };  
   
