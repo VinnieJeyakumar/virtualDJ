@@ -1,3 +1,5 @@
+let player;
+
 const loadSpotifySDK = (token) => {
     return new Promise((resolve) => {
         if (window.Spotify && window.Spotify.Player) {
@@ -15,7 +17,7 @@ const loadSpotifySDK = (token) => {
 };
   
 const createPlayer = (token, resolve) => {
-    const player = new window.Spotify.Player({
+    player = new window.Spotify.Player({
         name: "Web Playback SDK",
         getOAuthToken: (cb) => {
             cb(token);
@@ -56,6 +58,8 @@ const setActiveDevice = async (device_id, accessToken) => {
         }),
     });
 };
+
+export const getPlayer = () => player;
 
 export { loadSpotifySDK, createPlayer, searchSongs, setActiveDevice };  
   

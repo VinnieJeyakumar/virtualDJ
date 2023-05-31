@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Knob } from 'primereact/knob';
 import { Slider } from 'primereact/slider';
+import { getPlayer } from "./spotifyUtils.js";
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
@@ -20,10 +21,17 @@ function DJBoard() {
     }
   };
 
-  const changeSlider = (index, e) => {
+  const changeSlider = async (index, e) => {
     let newSliderValue = [...sliderValue];
     newSliderValue[index] = e.value;
     setSliderValue(newSliderValue);
+    if (index === 0) {
+      let player = getPlayer();
+      if (player) {
+        const volume = e.value / 100;
+        await player.setVolume(volume);
+      }
+    }
   };
 
   const calculatePlaybackSpeed = (value) => {
